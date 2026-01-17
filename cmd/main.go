@@ -17,8 +17,8 @@ func main() {
 	accountsFlag := flag.String("account", "", "AWS account name(s) from config (comma-separated for multiple)")
 	formatFlag := flag.String("format", "table", "Output format: table, markdown")
 	outputFlag := flag.String("output", "stdout", "Output destination: stdout or file path")
-	// TODO: change this frfr
-	configPath := flag.String("config", "config.json", "Path to config file")
+	useProfile := flag.Bool("use-profile", true, "Use AWS credential profiles instead of config.json")
+	configPath := flag.String("config", "config.json", "Path to config file (ignored if --use-profile is set)")
 	flag.Parse()
 
 	// Validate required flags
@@ -47,7 +47,7 @@ func main() {
 
 	// Concurrently collect inventory from all accounts specified
 	collector := inventory.NewCollector()
-	results, errors := collector.CollectFromAccounts(cfg, accountNames)
+	results, errors := collector.CollectFromAccounts(cfg, accountNames, *useProfile)
 
 	// Log any errors but continue
 	for _, err := range errors {
