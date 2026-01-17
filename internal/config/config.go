@@ -17,7 +17,7 @@ type Account struct {
 	Region          string `json:"region"`
 	AccessKeyID     string `json:"access_key_id"`
 	SecretAccessKey string `json:"secret_access_key"`
-	SessionToken    string `json:"session_token"`
+	SessionToken    string `json:"session_token,omitempty"`
 }
 
 var LoadConfig = func(filepath string) (*Config, error) {

@@ -1,10 +1,23 @@
 Tractatus: AWS CLI Tool
 
 ## Table of Contents
+- [Getting Started](#getting-started)
 - [Command Structure](#command-structure)  
 - [Arguments](#arguments)  
 - [Resource Types](#resource-types-to-query)  
 - [Project Structure](#project-structure)
+
+## Getting Started
+**Build**
+```bash
+go mod download
+go build -o tractatus ./cmd/main.go
+```
+
+**Run**
+```bash
+./tractatus --account abc-production
+```
 
 ## Command Structure
 ```bash

@@ -41,7 +41,7 @@ type accountResult struct {
 }
 
 // Collect the inventory from multiple AWS accounts concurrently
-func (c *Collector) CollectFromAccounts(cfg *config.Config, accountNames []string) ([]*Inventory, []error) {
+func (c *Collector) CollectFromAccounts(cfg *config.Config, accountNames []string, useProfile bool) ([]*Inventory, []error) {
 	ctx := context.Background()
 
 	// this channel collects results
@@ -55,7 +55,7 @@ func (c *Collector) CollectFromAccounts(cfg *config.Config, accountNames []strin
 			defer wg.Done()
 
 			account := cfg.Accounts[accName]
-			inventory, err := c.collectFromAccount(ctx, accName, account)
+			inventory, err := c.collectFromAccount(ctx, accName, account, useProfile)
 			results <- accountResult{
 				inventory: inventory,
 				err:       err,
@@ -85,9 +85,9 @@ func (c *Collector) CollectFromAccounts(cfg *config.Config, accountNames []strin
 }
 
 // Collects inventory from a single AWS account
-func (c *Collector) collectFromAccount(ctx context.Context, accountName string, account config.Account) (*Inventory, error) {
+func (c *Collector) collectFromAccount(ctx context.Context, accountName string, account config.Account, useProfile bool) (*Inventory, error) {
 	// Create AWS client
-	client, err := awsclient.NewClient(ctx, accountName, account)
+	client, err := awsclient.NewClient(ctx, accountName, account, useProfile)
 	if err != nil {
 		return nil, fmt.Errorf("collectFromAccount: account '%s': failed to create AWS client: %w", accountName, err)
 	}
