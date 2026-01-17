@@ -26,7 +26,7 @@ func NewClient(ctx context.Context, accountName string, account config.Account) 
 		awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 			account.AccessKeyID,
 			account.SecretAccessKey,
-			"", // if this shiiii ends up being the sesh token . Just sayin
+			account.SessionToken, // This can be an empty string
 		)),
 	)
 	if err != nil {
