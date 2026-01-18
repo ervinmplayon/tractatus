@@ -37,7 +37,7 @@ func NewClient(ctx context.Context, accountName string, account *config.Account,
 			awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 				account.AccessKeyID,
 				account.SecretAccessKey,
-				account.SessionToken,
+				account.SessionToken, // This can be an empty string
 			)),
 		)
 	}
