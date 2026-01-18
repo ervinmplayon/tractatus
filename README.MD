@@ -103,7 +103,6 @@ aws-inventory/
 │   └── output/
 │       ├── table.go           # Table formatter
 │       └── markdown.go        # Markdown formatter
-├── config.json                 # AWS credentials
 ├── go.mod
 └── README.md
 ```
