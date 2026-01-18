@@ -2,9 +2,9 @@
 
 # Build the binary
 build:
-	@echo "Building aws-inventory..."
-	@go build -o aws-inventory ./cmd/main.go
-	@echo "✓ Build complete: ./aws-inventory"
+	@echo "Building tractatus..."
+	@go build -o tractatus ./cmd/main.go
+	@echo "✓ Build complete: ./tractatus"
 
 # Run with default settings (requires config.json)
 run:
@@ -13,7 +13,7 @@ run:
 # Clean build artifacts
 clean:
 	@echo "Cleaning..."
-	@rm -f aws-inventory
+	@rm -f tractatus
 	@echo "✓ Clean complete"
 
 # Run tests (when you add them)
@@ -41,9 +41,9 @@ lint:
 
 # Install the binary to $GOPATH/bin
 install:
-	@echo "Installing aws-inventory..."
+	@echo "Installing tractatus..."
 	@go install ./cmd/main.go
-	@echo "✓ Installed to $(go env GOPATH)/bin/aws-inventory"
+	@echo "✓ Installed to $(go env GOPATH)/bin/tractatus"
 
 # Show help
 help:
