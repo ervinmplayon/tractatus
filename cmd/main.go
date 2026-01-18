@@ -26,23 +26,31 @@ func main() {
 		log.Fatal("Error: --account flag is required")
 	}
 
-	// Load configuration
-	cfg, err := config.LoadConfig(*configPath)
-	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
-	}
-
 	// Parse account names
 	accountNames := strings.Split(*accountsFlag, ",")
 	for i := range accountNames {
 		accountNames[i] = strings.TrimSpace(accountNames[i])
 	}
 
-	// Validate accounts exist in config
-	for _, name := range accountNames {
-		if _, exists := cfg.Accounts[name]; !exists {
-			log.Fatalf("Error: Account '%s' not found in config", name)
+	// Load configuration. Config is optional since default is AWS profile
+	var cfg *config.Config
+	var err error
+	if !*useProfile {
+		cfg, err = config.LoadConfig(*configPath)
+		if err != nil {
+			log.Fatalf("main Error: Failed to load config: %v", err)
 		}
+
+		// Validate accounts exist in config
+		for _, name := range accountNames {
+			if _, exists := cfg.Accounts[name]; !exists {
+				log.Fatalf("main Error: Account '%s' not found in config", name)
+			}
+		}
+	} else {
+		// Using AWS profiles - cfg remains nil, which is fine!
+		// The AWS SDK will read from ~/.aws/credentials and ~/.aws/config
+		fmt.Fprintf(os.Stderr, "Using AWS credential profiles from ~/.aws/\n")
 	}
 
 	// Concurrently collect inventory from all accounts specified

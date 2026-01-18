@@ -54,7 +54,12 @@ func (c *Collector) CollectFromAccounts(cfg *config.Config, accountNames []strin
 		go func(accName string) {
 			defer wg.Done()
 
-			account := cfg.Accounts[accName]
+			var account *config.Account
+			if cfg != nil {
+				acc := cfg.Accounts[accName]
+				account = &acc
+			}
+
 			inventory, err := c.collectFromAccount(ctx, accName, account, useProfile)
 			results <- accountResult{
 				inventory: inventory,
@@ -85,7 +90,7 @@ func (c *Collector) CollectFromAccounts(cfg *config.Config, accountNames []strin
 }
 
 // Collects inventory from a single AWS account
-func (c *Collector) collectFromAccount(ctx context.Context, accountName string, account config.Account, useProfile bool) (*Inventory, error) {
+func (c *Collector) collectFromAccount(ctx context.Context, accountName string, account *config.Account, useProfile bool) (*Inventory, error) {
 	// Create AWS client
 	client, err := awsclient.NewClient(ctx, accountName, account, useProfile)
 	if err != nil {
