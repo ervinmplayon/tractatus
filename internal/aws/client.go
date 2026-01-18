@@ -19,23 +19,25 @@ type Client struct {
 }
 
 // Creates a new AWS client for the given account
-func NewClient(ctx context.Context, accountName string, account config.Account, useProfile bool) (*Client, error) {
+func NewClient(ctx context.Context, accountName string, account *config.Account, useProfile bool) (*Client, error) {
 	var cfg aws.Config
 	var err error
 	if useProfile {
-		// Use AWS credential profile (profile name = account name)
+		// Use AWS credential profile - region from ~/.aws/config
 		cfg, err = awsconfig.LoadDefaultConfig(ctx,
-			awsconfig.WithRegion(account.Region),
-			awsconfig.WithSharedConfigProfile(accountName), // Uses account name as profile name
+			awsconfig.WithSharedConfigProfile(accountName),
 		)
 	} else {
-		cfg, err = awsconfig.LoadDefaultConfig(
-			ctx,
+		// Use credentials from config.json
+		if account == nil {
+			return nil, fmt.Errorf("newClient: account config required when not using profiles")
+		}
+		cfg, err = awsconfig.LoadDefaultConfig(ctx,
 			awsconfig.WithRegion(account.Region),
 			awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 				account.AccessKeyID,
 				account.SecretAccessKey,
-				account.SessionToken, // This can be an empty string
+				account.SessionToken,
 			)),
 		)
 	}
