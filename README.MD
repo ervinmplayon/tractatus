@@ -1,4 +1,4 @@
-Tractatus: AWS CLI Tool
+# Tractatus: AWS CLI Tool
 
 ## Table of Contents
 - [Getting Started](#getting-started)
@@ -98,8 +98,7 @@ aws-inventory/
 │   ├── aws/
 │   │   └── client.go          # AWS API client
 │   ├── inventory/
-│   │   ├── collector.go       # Resource collection logic
-│   │   └── filter.go          # EKS filtering
+│   │   ├── collector.go       # Resource collection logic + EKS filtering
 │   └── output/
 │       ├── table.go           # Table formatter
 │       └── markdown.go        # Markdown formatter
