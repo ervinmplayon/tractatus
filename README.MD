@@ -39,6 +39,7 @@ go build -o tractatus ./cmd/main.go
 |--account       | AWS account name(s) from config                   |         -             |           Yes      |
 |--format        | Output format: table, markdown                    |       table           |           No       |
 |--output        | Output destination: stdout, file path, confluence |       stdout          |           No       |
+|--use-profile   | (bool) Use AWS credentials                        |       true            |           No       |
 +----------------+---------------------------------------------------+-----------------------+--------------------+
 ```
 
