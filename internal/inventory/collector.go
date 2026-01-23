@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	awsclient "github.com/ervinmplayon/tractatus/internal/aws"
 	"github.com/ervinmplayon/tractatus/internal/config"
+	awsclient "github.com/ervinmplayon/tractatus/internal/sources/aws"
 )
 
 // Manages resource collection form multiple AWS accounts
