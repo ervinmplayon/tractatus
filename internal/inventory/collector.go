@@ -54,7 +54,7 @@ type DataSource interface {
 func (c *Collector) CollectFromSource(ctx context.Context, source DataSource) (*Inventory, error) {
 	resources, err := source.Collect(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", source.Name(), err)
+		return nil, fmt.Errorf("error [CollectFromSource()] %s: %w", source.Name(), err)
 	}
 
 	return &Inventory{
