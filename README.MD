@@ -18,10 +18,10 @@ go build -o tractatus ./cmd/main.go
 ```bash
 # Run with GitHub (default)
 export GITHUB_TOKEN=<token_here>
-./tractatus --github-org playon
+./tractatus --github-org org-name
 
 # Save to markdown
-./tractatus --github-org playon --format markdown --output repos.md
+./tractatus --github-org org-name --format markdown --output repos.md
 
 # AWS still works too
 ./tractatus --source aws --account production
@@ -31,8 +31,10 @@ export GITHUB_TOKEN=<token_here>
 ```bash
 | Repo Name    | Owner     | Last Committer | CODEOWNERS | Platform | CI/CD     | Tests      |
 |--------------|-----------|----------------|------------|----------|-----------|------------|
-| unity-api    | dashbirds | Alice Smith    | Yes (2)    | ECS      | CircleCI  | Yes (pytest)|
-| web-frontend | web-team  | Bob Jones      | No         | Unknown  | GitHub Actions | Yes     |
+| unity-api    | dashbirds | a.danger  | Yes (2)    | ECS      | CircleCI  | Yes (pytest)|
+| web-frontend | web-team  | v.myers   | No         | Unknown  | GitHub Actions | Yes     |
+| monorepo     | mono-team | j.biden   | No         | Unknown  | GitHub Actions | Yes     |
+| ace          | ace-team  | b.lesnar  | No         | Unknown  | GitHub Actions | Yes     |
 ```
 
 ## Project Structure
