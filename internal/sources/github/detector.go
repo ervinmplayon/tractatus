@@ -189,6 +189,7 @@ func (d *Detector) DetectCodeOwners(files []string) bool {
 // Extracts team/owner information from codeowners content
 func (d *Detector) ParseCodeOwners(content string) []string {
 	var owners []string
+	ownerSet := make(map[string]bool) // Track unique owners
 	lines := strings.Split(content, "\n")
 
 	for _, line := range lines {
@@ -198,23 +199,28 @@ func (d *Detector) ParseCodeOwners(content string) []string {
 			continue
 		}
 
-		// CODEOWNERS format: path @owner1 @owner2
+		// CODEOWNERS format: path @owner1 @owner2 email@example.com
 		parts := strings.Fields(line)
 		if len(parts) > 1 {
+			// Skip the first part (it's the file pattern like * or /src/*)
 			for _, part := range parts[1:] {
+				var owner string
+
 				if strings.HasPrefix(part, "@") {
-					owner := strings.TrimPrefix(part, "@")
-					// Avoid duplicates
-					found := false
-					for _, existing := range owners {
-						if existing == owner {
-							found = true
-							break
-						}
-					}
-					if !found {
-						owners = append(owners, owner)
-					}
+					// GitHub username: @username or @org/team
+					owner = strings.TrimPrefix(part, "@")
+				} else if strings.Contains(part, "@") {
+					// Email address: user@domain.com
+					owner = part
+				} else {
+					// Skip non-owner parts (like file patterns)
+					continue
+				}
+
+				// Add to set (deduplicates automatically)
+				if !ownerSet[owner] {
+					ownerSet[owner] = true
+					owners = append(owners, owner)
 				}
 			}
 		}
