@@ -63,7 +63,7 @@ func writeTable(writer io.Writer, inv *inventory.Inventory) error {
 	return writeAWSTable(writer, inv)
 }
 
-// writeGitHubTable writes GitHub inventory as a table
+// Writes GitHub inventory as a table
 func writeGitHubTable(writer io.Writer, inv *inventory.Inventory) error {
 	// Calculate column widths
 	widths := calculateGitHubColumnWidths(inv)
@@ -116,7 +116,7 @@ func writeGitHubTable(writer io.Writer, inv *inventory.Inventory) error {
 	return nil
 }
 
-// writeAWSTable writes AWS inventory as a table
+// Writes AWS inventory as a table
 func writeAWSTable(writer io.Writer, inv *inventory.Inventory) error {
 	// Calculate column widths
 	widths := calculateAWSColumnWidths(inv)
@@ -156,7 +156,7 @@ func writeAWSTable(writer io.Writer, inv *inventory.Inventory) error {
 	return nil
 }
 
-// calculateGitHubColumnWidths determines the width needed for each GitHub column
+// Determines the width needed for each GitHub column
 func calculateGitHubColumnWidths(inv *inventory.Inventory) []int {
 	headers := []string{"Repo Name", "Owner", "Last Committer", "CODEOWNERS", "Platform", "CI/CD", "Tests"}
 	widths := make([]int, len(headers))
@@ -206,7 +206,7 @@ func calculateGitHubColumnWidths(inv *inventory.Inventory) []int {
 	return widths
 }
 
-// calculateAWSColumnWidths determines the width needed for each AWS column
+// Determines the width needed for each AWS column
 func calculateAWSColumnWidths(inv *inventory.Inventory) []int {
 	headers := []string{"App Name", "Owner", "Team", "Platform", "Stack Name", "CI/CD", "Account"}
 	widths := make([]int, len(headers))
@@ -238,7 +238,7 @@ func calculateAWSColumnWidths(inv *inventory.Inventory) []int {
 	return widths
 }
 
-// printTableRow prints a single row with proper padding
+// Prints a single row with proper padding
 func printTableRow(writer io.Writer, widths []int, values ...string) {
 	fmt.Fprint(writer, "| ")
 	for i, val := range values {
@@ -247,7 +247,7 @@ func printTableRow(writer io.Writer, widths []int, values ...string) {
 	fmt.Fprintln(writer)
 }
 
-// printTableSeparator prints a separator line
+// Prints a separator line
 func printTableSeparator(writer io.Writer, widths []int) {
 	fmt.Fprint(writer, "|")
 	for _, width := range widths {
@@ -256,7 +256,7 @@ func printTableSeparator(writer io.Writer, widths []int) {
 	fmt.Fprintln(writer)
 }
 
-// formatBool converts boolean to Yes/No string
+// Converts boolean to Yes/No string
 func formatBool(b bool) string {
 	if b {
 		return "Yes"

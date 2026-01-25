@@ -51,7 +51,7 @@ func (w *FileMarkdownWriter) Write(inv *inventory.Inventory) error {
 // Writes the inventory in Confluencee-compatible markdown format
 func writeMarkdown(writer io.Writer, inv *inventory.Inventory) error {
 	// Header
-	fmt.Fprintln(writer, "# AWS Resource Inventory")
+	fmt.Fprintln(writer, "# Resource Inventory")
 	fmt.Fprintln(writer)
 	fmt.Fprintf(writer, "**Generated**: %s\n", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Fprintln(writer)
@@ -61,8 +61,76 @@ func writeMarkdown(writer io.Writer, inv *inventory.Inventory) error {
 		return nil
 	}
 
+	// Detect if this is GitHub or AWS data
+	isGitHub := len(inv.Resources) > 0 && inv.Resources[0].GitHubRepo != ""
+
+	if isGitHub {
+		return writeGitHubMarkdown(writer, inv)
+	}
+	return writeAWSMarkdown(writer, inv)
+}
+
+// Writes GitHub inventory as markdown
+func writeGitHubMarkdown(writer io.Writer, inv *inventory.Inventory) error {
 	// Summary statistics
-	summary := generateSummary(inv)
+	summary := generateGitHubSummary(inv)
+	fmt.Fprintln(writer, "## Summary")
+	fmt.Fprintln(writer)
+	fmt.Fprintf(writer, "- **Total Repositories**: %d\n", summary.TotalResources)
+
+	for platform, count := range summary.ByPlatform {
+		fmt.Fprintf(writer, "- **%s**: %d\n", platform, count)
+	}
+	fmt.Fprintln(writer)
+
+	fmt.Fprintf(writer, "- **With CI/CD**: %d\n", summary.WithCICD)
+	fmt.Fprintf(writer, "- **With Tests**: %d\n", summary.WithTests)
+	fmt.Fprintf(writer, "- **With CODEOWNERS**: %d\n", summary.WithCodeOwners)
+	fmt.Fprintln(writer)
+
+	// Resources table
+	fmt.Fprintln(writer, "## Repositories")
+	fmt.Fprintln(writer)
+	fmt.Fprintln(writer, "| Repo Name | Owner | Last Committer | CODEOWNERS | Platform | CI/CD | Tests |")
+	fmt.Fprintln(writer, "|-----------|-------|----------------|------------|----------|-------|-------|")
+
+	for _, res := range inv.Resources {
+		cicd := res.CICDPlatform
+		if cicd == "" {
+			cicd = "No"
+		}
+
+		codeowners := "No"
+		if res.HasCodeOwners {
+			codeowners = fmt.Sprintf("Yes (%d)", len(res.CodeOwners))
+		}
+
+		tests := "No"
+		if res.HasTests {
+			tests = "Yes"
+			if res.TestFramework != "" {
+				tests = fmt.Sprintf("Yes (%s)", res.TestFramework)
+			}
+		}
+
+		fmt.Fprintf(writer, "| %s | %s | %s | %s | %s | %s | %s |\n",
+			escapeMarkdown(res.AppName),
+			escapeMarkdown(res.Owner),
+			escapeMarkdown(res.LastCommitter),
+			escapeMarkdown(codeowners),
+			escapeMarkdown(res.Platform),
+			escapeMarkdown(cicd),
+			escapeMarkdown(tests),
+		)
+	}
+
+	return nil
+}
+
+// Writes AWS inventory as markdown
+func writeAWSMarkdown(writer io.Writer, inv *inventory.Inventory) error {
+	// Summary statistics
+	summary := generateAWSSummary(inv)
 	fmt.Fprintln(writer, "## Summary")
 	fmt.Fprintln(writer)
 	fmt.Fprintf(writer, "- **Total Resources**: %d\n", summary.TotalResources)
@@ -102,17 +170,35 @@ func writeMarkdown(writer io.Writer, inv *inventory.Inventory) error {
 	return nil
 }
 
-// Contains statistics about the inventory
-type Summary struct {
-	TotalResources int
-	ByPlatform     map[string]int
-	ByAccount      map[string]int
-	WithCICD       int
-	WithoutCICD    int
+// Creates summary statistics for GitHub inventory
+func generateGitHubSummary(inv *inventory.Inventory) Summary {
+	summary := Summary{
+		TotalResources: len(inv.Resources),
+		ByPlatform:     make(map[string]int),
+		ByAccount:      make(map[string]int),
+	}
+
+	for _, res := range inv.Resources {
+		summary.ByPlatform[res.Platform]++
+
+		if res.HasCICD {
+			summary.WithCICD++
+		}
+
+		if res.HasTests {
+			summary.WithTests++
+		}
+
+		if res.HasCodeOwners {
+			summary.WithCodeOwners++
+		}
+	}
+
+	return summary
 }
 
-// Creates summary statistics from inventory
-func generateSummary(inv *inventory.Inventory) Summary {
+// Creates summary statistics for AWS inventory
+func generateAWSSummary(inv *inventory.Inventory) Summary {
 	summary := Summary{
 		TotalResources: len(inv.Resources),
 		ByPlatform:     make(map[string]int),
@@ -133,6 +219,18 @@ func generateSummary(inv *inventory.Inventory) Summary {
 	return summary
 }
 
+// Contains statistics about the inventory
+type Summary struct {
+	TotalResources int
+	ByPlatform     map[string]int
+	ByAccount      map[string]int
+	WithCICD       int
+	WithoutCICD    int
+	WithTests      int
+	WithCodeOwners int
+}
+
+// Escapes special markdown characters
 func escapeMarkdown(s string) string {
 	// Basic escaping for pipe characters which can break tables
 	replacer := strings.NewReplacer(
