@@ -32,3 +32,6 @@ go.work.sum
 # .vscode/
 
 *_secrets.json
+
+# the binary output file 
+tractatus
