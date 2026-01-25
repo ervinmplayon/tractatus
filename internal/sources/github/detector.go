@@ -9,9 +9,11 @@ func NewDetector() *Detector {
 }
 
 // CI/CD platform indicators (root level only, PERHAPS rethink because what if its not root?)
+// For files, match exactly; for directories, match prefix
 var cicdFiles = map[string]string{
-	".circleci/config.yml":    "CircleCI",
+	".circleci":               "CircleCI",
 	".github/workflows":       "GitHub Actions",
+	".github":                 "GitHub Actions",
 	"bitbucket-pipelines.yml": "Bitbucket Pipelines",
 	".gitlab-ci.yml":          "GitLab CI",
 	"Jenkinsfile":             "Jenkins",
@@ -21,20 +23,20 @@ var cicdFiles = map[string]string{
 
 // Test directory patterns
 var testDirs = []string{
-	"test/",
-	"tests/",
-	"__tests__/",
-	"spec/",
-	"test_suite/",
-	"testing/",
+	"test",
+	"tests",
+	"__tests__",
+	"spec",
+	"test_suite",
+	"testing",
 }
 
 // EKS platform indicators (if found, skip the repo)
 var eksIndicators = []string{
-	"k8s/",
-	"kubernetes/",
-	".kube/",
-	"helm/",
+	"k8s",
+	"kubernetes",
+	".kube",
+	"helm",
 	"Chart.yaml",
 	"kustomization.yaml",
 	"kustomization.yml",
@@ -52,14 +54,14 @@ var lambdaIndicators = []string{
 	"serverless.yaml",
 	"template.yaml",
 	"template.yml", // SAM
-	"lambda/",
-	"functions/",
+	"lambda",       // directory
+	"functions",    // directory
 }
 
 var beanstalkIndicators = []string{
 	".ebextensions/",
 	"Procfile",
-	".elasticbeanstalk/",
+	".elasticbeanstalk",
 }
 
 // Checks for CI/CD configuration files at root level
@@ -67,6 +69,12 @@ func (d *Detector) DetectCICD(files []string) (bool, string) {
 	for _, file := range files {
 		for pattern, platform := range cicdFiles {
 			if file == pattern || strings.HasPrefix(file, pattern) {
+				return true, platform
+			}
+
+			// Directory match (for .circleci, .github)
+			// Files list contains directory names without trailing slash
+			if strings.HasPrefix(pattern, file+"/") || file == strings.TrimSuffix(pattern, "/") {
 				return true, platform
 			}
 		}
@@ -78,7 +86,8 @@ func (d *Detector) DetectCICD(files []string) (bool, string) {
 func (d *Detector) DetectTests(files []string) (bool, string) {
 	for _, file := range files {
 		for _, testDir := range testDirs {
-			if file == strings.TrimSuffix(testDir, "/") || strings.HasPrefix(file, testDir) {
+			// Directory match (without trailing slash in files list)
+			if file == testDir {
 				return true, "detected test directory"
 			}
 		}
@@ -109,7 +118,8 @@ func (d *Detector) DetectTests(files []string) (bool, string) {
 func (d *Detector) IsEKS(files []string) bool {
 	for _, file := range files {
 		for _, indicator := range eksIndicators {
-			if file == strings.TrimSuffix(indicator, "/") || strings.HasPrefix(file, indicator) {
+			// Check both exact match and directory name
+			if file == indicator || file == strings.TrimSuffix(indicator, "/") {
 				return true
 			}
 		}
@@ -124,7 +134,7 @@ func (d *Detector) DetectPlatform(files []string) string {
 	// Check ECS
 	for _, file := range files {
 		for _, indicator := range ecsIndicators {
-			if file == indicator || strings.HasPrefix(file, indicator) {
+			if file == indicator {
 				platforms = append(platforms, "ECS")
 				break
 			}
@@ -133,7 +143,7 @@ func (d *Detector) DetectPlatform(files []string) string {
 	// Check Lambda
 	for _, file := range files {
 		for _, indicator := range lambdaIndicators {
-			if file == indicator || strings.HasPrefix(file, indicator) {
+			if file == indicator {
 				platforms = append(platforms, "Lambda")
 				break
 			}
@@ -143,7 +153,7 @@ func (d *Detector) DetectPlatform(files []string) string {
 	// Check Elastic Beanstalk
 	for _, file := range files {
 		for _, indicator := range beanstalkIndicators {
-			if file == indicator || strings.HasPrefix(file, indicator) {
+			if file == indicator {
 				platforms = append(platforms, "Elastic Beanstalk")
 				break
 			}
