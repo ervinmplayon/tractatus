@@ -91,8 +91,8 @@ func writeGitHubMarkdown(writer io.Writer, inv *inventory.Inventory) error {
 	// Resources table
 	fmt.Fprintln(writer, "## Repositories")
 	fmt.Fprintln(writer)
-	fmt.Fprintln(writer, "| Repo Name | Owner | Last Committer | CODEOWNERS | Platform | CI/CD | Tests |")
-	fmt.Fprintln(writer, "|-----------|-------|----------------|------------|----------|-------|-------|")
+	fmt.Fprintln(writer, "| Repo Name | Owner(s) | Last Committer | Platform | CI/CD | Tests |")
+	fmt.Fprintln(writer, "|-----------|----------|----------------|----------|-------|-------|")
 
 	for _, res := range inv.Resources {
 		cicd := res.CICDPlatform
@@ -100,9 +100,11 @@ func writeGitHubMarkdown(writer io.Writer, inv *inventory.Inventory) error {
 			cicd = "No"
 		}
 
-		codeowners := "No"
-		if res.HasCodeOwners {
-			codeowners = fmt.Sprintf("Yes (%d)", len(res.CodeOwners))
+		// Format owners - show all if CodeOwners exist, else "Unknown"
+		owners := "Unknown"
+		if res.HasCodeOwners && len(res.CodeOwners) > 0 {
+			// For markdown, show all owners separated by commas
+			owners = strings.Join(res.CodeOwners, ", ")
 		}
 
 		tests := "No"
@@ -113,11 +115,10 @@ func writeGitHubMarkdown(writer io.Writer, inv *inventory.Inventory) error {
 			}
 		}
 
-		fmt.Fprintf(writer, "| %s | %s | %s | %s | %s | %s | %s |\n",
+		fmt.Fprintf(writer, "| %s | %s | %s | %s | %s | %s |\n",
 			escapeMarkdown(res.AppName),
-			escapeMarkdown(res.Owner),
+			escapeMarkdown(owners),
 			escapeMarkdown(res.LastCommitter),
-			escapeMarkdown(codeowners),
 			escapeMarkdown(res.Platform),
 			escapeMarkdown(cicd),
 			escapeMarkdown(tests),
