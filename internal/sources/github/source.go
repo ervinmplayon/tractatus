@@ -7,6 +7,7 @@ import (
 	"github.com/ervinmplayon/tractatus/internal/inventory"
 )
 
+// A DataSource needs the client to hook into platform, the detector for file detection
 type DataSource struct {
 	client          *Client
 	detector        *Detector
