@@ -89,21 +89,25 @@ resourceTypes := []string{
 
 ## Project Structure
 ```bash
-aws-inventory/
+tractatus/
 ├── cmd/
-│   └── main.go                 # CLI entry point
+│   └── main.go                    ← Updated with GitHub support
 ├── internal/
-│   ├── config/
-│   │   └── config.go          # Load config.json
-│   ├── aws/
-│   │   └── client.go          # AWS API client
+│   ├── sources/
+│   │   ├── source.go             ← DataSource interface
+│   │   ├── github/
+│   │   │   ├── client.go         ← GitHub API wrapper
+│   │   │   ├── detector.go       ← Multi-signal detection
+│   │   │   └── source.go         ← GitHub DataSource impl
+│   │   └── aws/
+│   │       ├── client.go         ← AWS API (existing)
+│   │       └── source.go         ← AWS DataSource impl
 │   ├── inventory/
-│   │   ├── collector.go       # Resource collection logic + EKS filtering
+│   │   └── collector.go          ← Unified collector
 │   └── output/
-│       ├── table.go           # Table formatter
-│       └── markdown.go        # Markdown formatter
-├── go.mod
-└── README.md
+│       ├── table.go              ← Updated for GitHub fields
+│       └── markdown.go           ← Updated for GitHub fields
+└── go.mod                         ← Added GitHub libraries
 ```
 
 ## FAQ

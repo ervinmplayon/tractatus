@@ -23,15 +23,25 @@ type Inventory struct {
 
 // Represents enriched resource information
 type ResourceInfo struct {
-	AppName      string
-	Owner        string
-	Team         string
-	Platform     string
-	StackName    string
-	HasCICD      bool
-	Account      string
-	ARN          string
-	ResourceTags map[string]string // keeping these for reference
+	AppName        string
+	Owner          string
+	Team           string
+	HasTests       bool
+	TestFramework  string
+	Platform       string
+	StackName      string
+	HasCICD        bool
+	CICDPlatform   string
+	HasCodeOwners  bool
+	CodeOwners     []string
+	Account        string
+	ARN            string
+	ResourceTags   map[string]string // keeping these for reference
+	GitHubRepo     string
+	RepoURL        string
+	IsArchived     bool
+	LastCommitter  string
+	LastCommitDate string
 }
 
 // Represent the result form querying a single account
