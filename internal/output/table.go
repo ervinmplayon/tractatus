@@ -89,9 +89,19 @@ func writeGitHubTable(writer io.Writer, inv *inventory.Inventory) error {
 			cicd = "No"
 		}
 
-		codeowners := "No"
-		if res.HasCodeOwners {
-			codeowners = fmt.Sprintf("Yes (%d)", len(res.CodeOwners))
+		// Format owners - show all if CodeOwners exist, else "Unknown"
+		owners := "Unknown"
+		if res.HasCodeOwners && len(res.CodeOwners) > 0 {
+			// Show first 3 owners, or all if <= 3
+			if len(res.CodeOwners) <= 3 {
+				owners = strings.Join(res.CodeOwners, ", ")
+			} else {
+				owners = fmt.Sprintf("%s, %s, %s (+%d more)",
+					res.CodeOwners[0],
+					res.CodeOwners[1],
+					res.CodeOwners[2],
+					len(res.CodeOwners)-3)
+			}
 		}
 
 		tests := "No"
@@ -104,9 +114,8 @@ func writeGitHubTable(writer io.Writer, inv *inventory.Inventory) error {
 
 		printTableRow(writer, widths,
 			res.AppName,
-			res.Owner,
+			owners,
 			res.LastCommitter,
-			codeowners,
 			res.Platform,
 			cicd,
 			tests,
@@ -158,7 +167,7 @@ func writeAWSTable(writer io.Writer, inv *inventory.Inventory) error {
 
 // Determines the width needed for each GitHub column
 func calculateGitHubColumnWidths(inv *inventory.Inventory) []int {
-	headers := []string{"Repo Name", "Owner", "Last Committer", "CODEOWNERS", "Platform", "CI/CD", "Tests"}
+	headers := []string{"Repo Name", "Owner(s)", "Last Committer", "Platform", "CI/CD", "Tests"}
 	widths := make([]int, len(headers))
 
 	// Start with header widths
@@ -168,9 +177,17 @@ func calculateGitHubColumnWidths(inv *inventory.Inventory) []int {
 
 	// Check resource data
 	for _, res := range inv.Resources {
-		codeowners := "No"
-		if res.HasCodeOwners {
-			codeowners = fmt.Sprintf("Yes (%d)", len(res.CodeOwners))
+		owners := "Unknown"
+		if res.HasCodeOwners && len(res.CodeOwners) > 0 {
+			if len(res.CodeOwners) <= 3 {
+				owners = strings.Join(res.CodeOwners, ", ")
+			} else {
+				owners = fmt.Sprintf("%s, %s, %s (+%d more)",
+					res.CodeOwners[0],
+					res.CodeOwners[1],
+					res.CodeOwners[2],
+					len(res.CodeOwners)-3)
+			}
 		}
 
 		cicd := res.CICDPlatform
@@ -188,9 +205,8 @@ func calculateGitHubColumnWidths(inv *inventory.Inventory) []int {
 
 		values := []string{
 			res.AppName,
-			res.Owner,
+			owners,
 			res.LastCommitter,
-			codeowners,
 			res.Platform,
 			cicd,
 			tests,
