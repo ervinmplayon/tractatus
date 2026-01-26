@@ -171,10 +171,10 @@ func (d *Detector) DetectPlatform(files []string) string {
 // Checks if CODEOWNERS file exists
 func (d *Detector) DetectCodeOwners(files []string) bool {
 	codeownersFiles := []string{
-		"CODEOWNERS",
-		".github/CODEOWNERS",
-		"docs/CODEOWNERS",
-		"workflows/CODEOWNERS",
+		"CODEOWNERS", // file
+		".github",    // dir
+		"docs",       // dir
+		"workflows",  // dir
 	}
 
 	for _, file := range files {
