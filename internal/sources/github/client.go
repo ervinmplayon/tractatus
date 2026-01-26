@@ -168,16 +168,17 @@ func (c *Client) getLastCommit(ctx context.Context, repoName, branch string) (st
 func (c *Client) GetFileContent(ctx context.Context, repoName, filePath string) (string, error) {
 	fileContent, _, _, err := c.client.Repositories.GetContents(ctx, c.org, repoName, filePath, nil)
 	if err != nil {
-		return "", fmt.Errorf("getFileContent error: %w", err)
+		return "", fmt.Errorf("[getFileContent] error: %w", err)
 	}
 
+	// Safety check: if fileContent is nil, it's not a file (could be a directory)
 	if fileContent == nil {
-		return "", fmt.Errorf("getFileContent error file not found: %s", filePath)
+		return "", fmt.Errorf("[getFileContent] path %s is not a file", filePath)
 	}
 
 	content, err := fileContent.GetContent()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[getFileContent] failed to decode content: %w", err)
 	}
 
 	return content, nil

@@ -19,7 +19,7 @@ type Client struct {
 }
 
 // Creates a new AWS client for the given account
-func NewClient(ctx context.Context, accountName string, account *config.Account, useProfile bool) (*Client, error) {
+func NewClient(ctx context.Context, accountName string, useProfile bool, account *config.Account) (*Client, error) {
 	var cfg aws.Config
 	var err error
 	if useProfile {

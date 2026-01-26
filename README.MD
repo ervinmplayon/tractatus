@@ -1,11 +1,11 @@
 # Tractatus: AWS CLI Tool
 
 ## Table of Contents
-- [Getting Started](#getting-started)
-- [Command Structure](#command-structure)  
-- [Arguments](#arguments)  
-- [Resource Types](#resource-types-to-query)  
+- [Getting Started](#getting-started)  
+- [Output Example](#output-example)  
 - [Project Structure](#project-structure)
+- [FAQ](#faq)
+
 
 ## Getting Started
 **Build**
@@ -16,75 +16,25 @@ go build -o tractatus ./cmd/main.go
 
 **Run**
 ```bash
-./tractatus --account abc-production
+# Run with GitHub (default)
+export GITHUB_TOKEN=<token_here>
+./tractatus --github-org org-name
+
+# Save to markdown
+./tractatus --github-org org-name --format markdown --output repos.md
+
+# AWS still works too
+./tractatus --source aws --account production
 ```
 
-## Command Structure
+## Output Example
 ```bash
-# basic usage
-./tractatus --account abc-prod --format table
-
-# with output file
-./tractatus --account abc-staging --format markdown --output inventory.md
-
-# multiple accounts
-./tractatus --account abc-prod,abc-staging --format table 
-```
-
-## Arguments
-```bash
-+----------------+---------------------------------------------------+-----------------------+--------------------+
-|Argument        |           Description                             |       Default         |           Required |
-|----------------+---------------------------------------------------+-----------------------+--------------------+
-|--account       | AWS account name(s) from config                   |         -             |           Yes      |
-|--format        | Output format: table, markdown                    |       table           |           No       |
-|--output        | Output destination: stdout, file path, confluence |       stdout          |           No       |
-|--use-profile   | (bool) Use AWS credentials                        |       true            |           No       |
-+----------------+---------------------------------------------------+-----------------------+--------------------+
-```
-
-## Resource Types to Query
-```go
-resourceTypes := []string{
-    "ec2:instance",
-    "lambda:function",
-    "ecs:service",
-    "ecs:cluster",
-    "elasticbeanstalk:application",
-    "elasticbeanstalk:environment",
-    "lightsail:instance",
-    // Potentially also:
-    "apprunner:service",  // AWS App Runner
-    "batch:job-queue",    // AWS Batch
-}
-
-# data extratction
-## Tags to Extract
-| Tag Key | Column Name | Fallback |
-|---------|-------------|----------|
-| `Name` | App Name | Parse from ARN or "Unknown" |
-| `owned-by` | Owner | Check `team` tag, else "Unknown" |
-| `team` | Team | Check `owned-by` tag, else "Unknown" |
-| `aws:cloudformation:stack-name` | Stack Name | "None" if not CloudFormation-managed |
-
-### Derived Fields
-
-| Column | How to Calculate |
-|--------|------------------|
-| **Platform** | Parse from ARN: `ec2`, `lambda`, `ecs`, etc. |
-| **Has CI/CD** | `Yes` if `aws:cloudformation:stack-name` exists, else `No` |
-| **Account** | From which account it was queried |
-
-
-## Table Output Structure
-
-+------------------+------------+----------+------------------+---------+--------------+
-| App Name         | Owner      | Platform | Stack Name       | CI/CD   | Account      |
-+------------------+------------+----------+------------------+---------+--------------+
-| unity-api        | dashbirds  | ECS      | unity-api-prod   | Yes     | production   |
-| data-processor   | data-team  | Lambda   | None             | No      | production   |
-| web-frontend     | web-team   | EC2      | web-prod-stack   | Yes     | staging      |
-+------------------+------------+----------+------------------+---------+--------------+
+| Repo Name    | Owner     | Last Committer | CODEOWNERS | Platform | CI/CD     | Tests      |
+|--------------|-----------|----------------|------------|----------|-----------|------------|
+| unity-api    | dashbirds | a.danger  | Yes (2)    | ECS      | CircleCI  | Yes (pytest)|
+| web-frontend | web-team  | v.myers   | No         | Unknown  | GitHub Actions | Yes     |
+| monorepo     | mono-team | j.biden   | No         | Unknown  | GitHub Actions | Yes     |
+| ace          | ace-team  | b.lesnar  | No         | Unknown  | GitHub Actions | Yes     |
 ```
 
 ## Project Structure

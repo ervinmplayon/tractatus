@@ -50,12 +50,86 @@ func (w *FiletTableWriter) Write(inv *inventory.Inventory) error {
 // Writes the inventory as a formatted table
 func writeTable(writer io.Writer, inv *inventory.Inventory) error {
 	if len(inv.Resources) == 0 {
-		fmt.Fprintln(writer, "writeTable: No resources found.")
+		fmt.Fprintln(writer, "No resources found.")
 		return nil
 	}
 
-	// calculate the column widths and print header
-	widths := calculateColumnWidths(inv)
+	// Detect if this is GitHub or AWS data
+	isGitHub := len(inv.Resources) > 0 && inv.Resources[0].GitHubRepo != ""
+
+	if isGitHub {
+		return writeGitHubTable(writer, inv)
+	}
+	return writeAWSTable(writer, inv)
+}
+
+// Writes GitHub inventory as a table
+func writeGitHubTable(writer io.Writer, inv *inventory.Inventory) error {
+	// Calculate column widths
+	widths := calculateGitHubColumnWidths(inv)
+
+	// Print header
+	printTableRow(writer, widths,
+		"Repo Name",
+		"Owner",
+		"Last Committer",
+		"Platform",
+		"CI/CD",
+		"Tests",
+	)
+
+	// Print separator
+	printTableSeparator(writer, widths)
+
+	// Print rows
+	for _, res := range inv.Resources {
+		cicd := res.CICDPlatform
+		if cicd == "" {
+			cicd = "No"
+		}
+
+		// Format owners - show all if CodeOwners exist, else "Unknown"
+		owners := "Unknown"
+		if res.HasCodeOwners && len(res.CodeOwners) > 0 {
+			// Show first 3 owners, or all if <= 3
+			if len(res.CodeOwners) <= 3 {
+				owners = strings.Join(res.CodeOwners, ", ")
+			} else {
+				owners = fmt.Sprintf("%s, %s, %s (+%d more)",
+					res.CodeOwners[0],
+					res.CodeOwners[1],
+					res.CodeOwners[2],
+					len(res.CodeOwners)-3)
+			}
+		}
+
+		tests := "No"
+		if res.HasTests {
+			tests = "Yes"
+			if res.TestFramework != "" {
+				tests = fmt.Sprintf("Yes (%s)", res.TestFramework)
+			}
+		}
+
+		printTableRow(writer, widths,
+			res.AppName,
+			owners,
+			res.LastCommitter,
+			res.Platform,
+			cicd,
+			tests,
+		)
+	}
+
+	return nil
+}
+
+// Writes AWS inventory as a table
+func writeAWSTable(writer io.Writer, inv *inventory.Inventory) error {
+	// Calculate column widths
+	widths := calculateAWSColumnWidths(inv)
+
+	// Print header
 	printTableRow(writer, widths,
 		"App Name",
 		"Owner",
@@ -66,8 +140,10 @@ func writeTable(writer io.Writer, inv *inventory.Inventory) error {
 		"Account",
 	)
 
-	// print separator and print rows
+	// Print separator
 	printTableSeparator(writer, widths)
+
+	// Print rows
 	for _, res := range inv.Resources {
 		cicd := "No"
 		if res.HasCICD {
@@ -88,17 +164,74 @@ func writeTable(writer io.Writer, inv *inventory.Inventory) error {
 	return nil
 }
 
-// Determines the width needed for each column
-func calculateColumnWidths(inv *inventory.Inventory) []int {
-	headers := []string{"App Name", "Owner", "Team", "Platform", "Stack Name", "CI/CD", "Account"}
+// Determines the width needed for each GitHub column
+func calculateGitHubColumnWidths(inv *inventory.Inventory) []int {
+	headers := []string{"Repo Name", "Owner(s)", "Last Committer", "Platform", "CI/CD", "Tests"}
 	widths := make([]int, len(headers))
 
-	// starting with header widths
+	// Start with header widths
 	for i, header := range headers {
 		widths[i] = len(header)
 	}
 
-	// check resource data
+	// Check resource data
+	for _, res := range inv.Resources {
+		owners := "Unknown"
+		if res.HasCodeOwners && len(res.CodeOwners) > 0 {
+			if len(res.CodeOwners) <= 3 {
+				owners = strings.Join(res.CodeOwners, ", ")
+			} else {
+				owners = fmt.Sprintf("%s, %s, %s (+%d more)",
+					res.CodeOwners[0],
+					res.CodeOwners[1],
+					res.CodeOwners[2],
+					len(res.CodeOwners)-3)
+			}
+		}
+
+		cicd := res.CICDPlatform
+		if cicd == "" {
+			cicd = "No"
+		}
+
+		tests := "No"
+		if res.HasTests {
+			tests = "Yes"
+			if res.TestFramework != "" {
+				tests = fmt.Sprintf("Yes (%s)", res.TestFramework)
+			}
+		}
+
+		values := []string{
+			res.AppName,
+			owners,
+			res.LastCommitter,
+			res.Platform,
+			cicd,
+			tests,
+		}
+
+		for i, val := range values {
+			if len(val) > widths[i] {
+				widths[i] = len(val)
+			}
+		}
+	}
+
+	return widths
+}
+
+// Determines the width needed for each AWS column
+func calculateAWSColumnWidths(inv *inventory.Inventory) []int {
+	headers := []string{"App Name", "Owner", "Team", "Platform", "Stack Name", "CI/CD", "Account"}
+	widths := make([]int, len(headers))
+
+	// Start with header widths
+	for i, header := range headers {
+		widths[i] = len(header)
+	}
+
+	// Check resource data
 	for _, res := range inv.Resources {
 		values := []string{
 			res.AppName,
@@ -122,7 +255,7 @@ func calculateColumnWidths(inv *inventory.Inventory) []int {
 
 // Prints a single row with proper padding
 func printTableRow(writer io.Writer, widths []int, values ...string) {
-	fmt.Fprint(writer, "|")
+	fmt.Fprint(writer, "| ")
 	for i, val := range values {
 		fmt.Fprintf(writer, "%-*s | ", widths[i], val)
 	}
