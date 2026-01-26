@@ -2,9 +2,11 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/ervinmplayon/tractatus/internal/inventory"
+	"github.com/google/go-github/v57/github"
 )
 
 // A DataSource needs the client to hook into platform, the detector for file detection
@@ -83,7 +85,7 @@ func (ds *DataSource) analyzeRepository(ctx context.Context, repo *Repository) *
 
 	// If CODEOWNERS exists, fetch and parse it
 	if info.HasCodeOwners {
-		codeownersContent, err := ds.getCodeOwnersContent(ctx, repo.Name, repo.Files)
+		codeownersContent, err := ds.getCodeOwnersContent(ctx, repo.Name)
 		if err == nil {
 			info.CodeOwners = ds.detector.ParseCodeOwners(codeownersContent)
 
@@ -107,7 +109,7 @@ func (ds *DataSource) analyzeRepository(ctx context.Context, repo *Repository) *
 }
 
 // Fetches the CODEOWNERS file content
-func (ds *DataSource) getCodeOwnersContent(ctx context.Context, repoName string, files []string) (string, error) {
+func (ds *DataSource) getCodeOwnersContent(ctx context.Context, repoName string) (string, error) {
 	// Try common CODEOWNERS locations
 	codeownersLocations := []string{
 		"CODEOWNERS",
@@ -116,25 +118,25 @@ func (ds *DataSource) getCodeOwnersContent(ctx context.Context, repoName string,
 	}
 
 	for _, location := range codeownersLocations {
-		// Check if this location exists in files
-		found := false
-		for _, file := range files {
-			if file == location {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			continue
-		}
-
-		// Try to fetch the content
 		content, err := ds.client.GetFileContent(ctx, repoName, location)
-		if err == nil {
+		if err != nil {
+			var gerr *github.ErrorResponse
+
+			// Safe error type check, it will "reach inside" the wrapper error, find the original Github
+			// error rather than just converting it to a flat string.
+			if errors.As(err, &gerr) && gerr.Response.StatusCode == 404 {
+				// It's a 404, just move to the next location
+				continue
+			}
+
+			// For any other error, wrap the ORIGINAL err safely with %w
+			return "", fmt.Errorf("[getCodeOwnersContent] API error at %s: %w", location, err)
+		}
+
+		if content != "" {
 			return content, nil
 		}
 	}
 
-	return "", fmt.Errorf("getCodeOwnersContent CODEOWNERS file not found")
+	return "", fmt.Errorf("[getCodeOwnersContent] CODEOWNERS file not found")
 }
