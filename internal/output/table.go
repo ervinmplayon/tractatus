@@ -73,7 +73,6 @@ func writeGitHubTable(writer io.Writer, inv *inventory.Inventory) error {
 		"Repo Name",
 		"Owner",
 		"Last Committer",
-		"CODEOWNERS",
 		"Platform",
 		"CI/CD",
 		"Tests",
