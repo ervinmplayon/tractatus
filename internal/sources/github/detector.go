@@ -174,6 +174,7 @@ func (d *Detector) DetectCodeOwners(files []string) bool {
 		"CODEOWNERS",
 		".github/CODEOWNERS",
 		"docs/CODEOWNERS",
+		"workflows/CODEOWNERS",
 	}
 
 	for _, file := range files {
