@@ -187,6 +187,7 @@ func (d *Detector) DetectCodeOwners(files []string) bool {
 	return false
 }
 
+// TODO: CODEOWNERS file is not being recognized unless its situated at the root
 // Extracts team/owner information from codeowners content
 func (d *Detector) ParseCodeOwners(content string) []string {
 	var owners []string
