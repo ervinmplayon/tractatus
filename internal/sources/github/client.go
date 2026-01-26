@@ -178,7 +178,7 @@ func (c *Client) GetFileContent(ctx context.Context, repoName, filePath string) 
 
 	content, err := fileContent.GetContent()
 	if err != nil {
-		return "", fmt.Errorf("[getFileContent] failed to decode content: %w", err)
+		return "", fmt.Errorf("[getFileContent] failed to decode content for %s: %w", filePath, err)
 	}
 
 	return content, nil

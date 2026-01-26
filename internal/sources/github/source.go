@@ -115,6 +115,7 @@ func (ds *DataSource) getCodeOwnersContent(ctx context.Context, repoName string)
 		"CODEOWNERS",
 		".github/CODEOWNERS",
 		"docs/CODEOWNERS",
+		"workflows/CODEOWNERS",
 	}
 
 	for _, location := range codeownersLocations {
