@@ -2,10 +2,59 @@ package output
 
 import (
 	"encoding/csv"
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/ervinmplayon/tractatus/internal/inventory"
 )
+
+// write to std out-------------------------------------------------------------------
+type StdoutCSVWriter struct{}
+
+func NewStdoutCSVWriter() *StdoutCSVWriter {
+	return &StdoutCSVWriter{}
+}
+
+func (w *StdoutCSVWriter) Write(inv *inventory.Inventory) error {
+	return writeCSV(os.Stdout, inv)
+}
+
+// write to std out-------------------------------------------------------------------
+
+// write to file-----------------------------------------------------------------------
+type FileCSVWriter struct {
+	filepath string
+}
+
+func NewFileWriter(filepath string) *FileCSVWriter {
+	return &FileCSVWriter{filepath: filepath}
+}
+
+func (w *FileCSVWriter) Write(inv *inventory.Inventory) error {
+	file, err := os.Create(w.filepath)
+	if err != nil {
+		return fmt.Errorf("error [FileCSVWriter.Write()] failed to create file: %w", err)
+	}
+	defer file.Close()
+	return writeCSV(file, inv)
+}
+
+// write to file-----------------------------------------------------------------------
+
+func writeCSV(file *os.File, inv *inventory.Inventory) error {
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	if len(inv.Resources) == 0 {
+		return nil
+	}
+	isGitHub := len(inv.Resources) > 0 && inv.Resources[0].GitHubRepo != ""
+	if isGitHub {
+		return writeGitHubCSV(writer, inv)
+	}
+	return writeAWSCSV(writer, inv)
+}
 
 func writeGitHubCSV(writer *csv.Writer, inv *inventory.Inventory) error {
 	header := []string{
