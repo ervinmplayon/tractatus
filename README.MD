@@ -20,6 +20,12 @@ go build -o tractatus ./cmd/main.go
 export GITHUB_TOKEN=<token_here>
 ./tractatus --github-org org-name
 
+# CSV output on std out
+./tractatus --github-org org-name --format csv
+
+# CSV to file
+./tractatus --github-org org-name --format csv --output inventory.csv
+
 # Save to markdown
 ./tractatus --github-org org-name --format markdown --output repos.md
 

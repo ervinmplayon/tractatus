@@ -27,7 +27,7 @@ type FileCSVWriter struct {
 	filepath string
 }
 
-func NewFileWriter(filepath string) *FileCSVWriter {
+func NewFileCSVWriter(filepath string) *FileCSVWriter {
 	return &FileCSVWriter{filepath: filepath}
 }
 
