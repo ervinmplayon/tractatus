@@ -114,6 +114,12 @@ func main() {
 		} else {
 			writer = output.NewFileMarkdownWriter(*outputFlag)
 		}
+	case "csv":
+		if *outputFlag == "stdout" {
+			writer = output.NewStdoutCSVWriter()
+		} else {
+			writer = output.NewFileCSVWriter(*outputFlag)
+		}
 	default:
 		log.Fatalf("Error: Unknown format '%s'. Use 'table' or 'markdown'", *formatFlag)
 	}
