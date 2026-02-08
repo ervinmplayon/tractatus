@@ -31,6 +31,8 @@ export GITHUB_TOKEN=<token_here>
 
 # AWS still works too
 ./tractatus --source aws --account production
+
+./tractatus --source aws --account gofan_prod --output ~/Documents/csv/aws/aws_file.csv
 ```
 
 ## Output Example
