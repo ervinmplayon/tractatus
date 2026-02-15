@@ -47,6 +47,13 @@ type Repository struct {
 	LastCommitDate string
 }
 
+// For basic mode
+type BasicRepository struct {
+	Name    string
+	Owner   string
+	RepoUrl string
+}
+
 // Fetch all the repon in an org
 func (c *Client) ListRepositories(ctx context.Context, excludeArchived bool) ([]*Repository, error) {
 	var allRepos []*Repository

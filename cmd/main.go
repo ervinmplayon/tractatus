@@ -32,6 +32,9 @@ func main() {
 	formatFlag := flag.String("format", "table", "Output format: table, markdown")
 	outputFlag := flag.String("output", "stdout", "Output destination: stdout or file path")
 
+	// basic mode
+	basicMode := flag.Bool("basic-mode", false, "Perform basic mode")
+
 	flag.Parse()
 
 	var dataSource inventory.DataSource

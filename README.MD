@@ -71,6 +71,7 @@ tractatus/
 ## Basic Mode
 [ ] Flag: `--basic-mode`. Type: 'boolean', Default: `false`
 [ ] Headers: `app-name`, `owner`, `repo-url`
+[ ] Flag `--exclude-archived`. Type: 'boolean', Default: `true`
 [ ] Perform collect process
 [ ] Write to Confluence
 [ ] `owner` is the sus one. Keep it blank on first run
