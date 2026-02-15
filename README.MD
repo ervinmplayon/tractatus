@@ -68,6 +68,13 @@ tractatus/
 └── go.mod                         ← Added GitHub libraries
 ```
 
+## Basic Mode
+[ ] Flag: `--basic-mode`. Type: 'boolean', Default: `false`
+[ ] Headers: `app-name`, `owner`, `repo-url`
+[ ] Perform collect process
+[ ] Write to Confluence
+[ ] `owner` is the sus one. Keep it blank on first run
+
 ## FAQ
 1. Confluence Ouput: Direct API push to Confluence or generate Confluence-compatible markdown? Both
 2. Tag Fallbacks: If `name` tag is missing should we:
