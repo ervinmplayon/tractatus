@@ -53,10 +53,11 @@ func main() {
 			log.Fatal("Error: GitHub token required. Use --github-token flag or set GITHUB_TOKEN environment variable")
 		}
 		fmt.Fprintf(os.Stderr, "Collecting inventory from Github org: %s\n", *githubOrg)
-		if *basicMode == false {
+		if !*basicMode {
+			// Normal github scrape process
 			dataSource, err = githubsource.NewDataSource(token, *githubOrg, *excludeArchived)
 		} else {
-			// Basic Mode process.
+			// Basic Mode scrape process.
 			dataSource, err = basicgithubsource.NewDataSource(token, *githubOrg, *excludeArchived)
 		}
 
