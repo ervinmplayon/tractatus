@@ -12,6 +12,7 @@ import (
 	"github.com/ervinmplayon/tractatus/internal/output"
 	awssource "github.com/ervinmplayon/tractatus/internal/sources/aws"
 	githubsource "github.com/ervinmplayon/tractatus/internal/sources/github"
+	basicgithubsource "github.com/ervinmplayon/tractatus/internal/sources/github/basic"
 )
 
 func main() {
@@ -32,7 +33,7 @@ func main() {
 	formatFlag := flag.String("format", "table", "Output format: table, markdown")
 	outputFlag := flag.String("output", "stdout", "Output destination: stdout or file path")
 
-	// basic mode
+	// basic mode - Currently only works for Github Source
 	basicMode := flag.Bool("basic-mode", false, "Perform basic mode")
 
 	flag.Parse()
@@ -52,7 +53,13 @@ func main() {
 			log.Fatal("Error: GitHub token required. Use --github-token flag or set GITHUB_TOKEN environment variable")
 		}
 		fmt.Fprintf(os.Stderr, "Collecting inventory from Github org: %s\n", *githubOrg)
-		dataSource, err = githubsource.NewDataSource(token, *githubOrg, *excludeArchived)
+		if *basicMode == false {
+			dataSource, err = githubsource.NewDataSource(token, *githubOrg, *excludeArchived)
+		} else {
+			// Basic Mode process.
+			dataSource, err = basicgithubsource.NewDataSource(token, *githubOrg, *excludeArchived)
+		}
+
 		if err != nil {
 			log.Fatalf("Failed to create Github data source: %v", err)
 		}
